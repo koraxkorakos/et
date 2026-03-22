@@ -1,97 +1,55 @@
-cmake_minimum_required(VERSION 3.30...3.30.20240621-gb83fabd)
-project(et_project
-        VERSION 0.0.0.1
-        DESCRIPTION "C++ Expression Template Tutorial"
-        HOMEPAGE_URL https://github.com/koraxkorakos/et
-        LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.28)
 
-set(CMAKE_CXX_STANDARD 23)     
-set(CMAKE_CXX_STANDARD_REQUIRED On)
-set(CMAKE_CXX_EXTENSIONS Off)
-# -----------------------------------------------------------------------------
-option(ET_DOCTESTS "Build doctest unit tests" On)
-option(ET_GTESTS "Build googletest unit tests" On)
-option(ET_DOXYDOC "Build source documentation" Off)
-option(ET_BUILD_THE_MANUAL "Build the manual" On)
-
-set(ET_NUM_BASES "64" CACHE STRING "Number of of bases vectors")
-
-add_definitions("-D${ET_NUM_BASES}")
-
-#find_package(Boost, REQUIRED program_options system filesystem exception)
-#find_package(Eigen3 REQUIRED NO_MODULE)
-
-if(${ET_DOCTESTS})
-    set (ET_UNITTESTS On)
-elseif(${et_GTESTS})
-    set (ET_UNITTESTS On)
-else()
-    set (ET_UNITTESTS Off)
-endif()
-
-include(FetchContent)
-include(ExternalProject)
-
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        main
+project(ctv_value_set
+    VERSION 0.1.0
+    DESCRIPTION "C++ Expression Template Tutorial"
+    HOMEPAGE_URL https://github.com/koraxkorakos/et
+    LANGUAGES CXX
 )
 
-FetchContent_Declare(
-    doctest
-    GIT_REPOSITORY https://github.com/doctest/doctest.git
-    GIT_TAG        master
+include(CTest)
+
+option(CTV_BUILD_TESTS "Build unit tests" ON)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_library(ctv_value_set)
+add_library(ctv::value_set ALIAS ctv_value_set)
+
+target_sources(ctv_value_set
+    PUBLIC
+        FILE_SET cxx_modules TYPE CXX_MODULES
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+        FILES
+            ${CMAKE_CURRENT_SOURCE_DIR}/modules/ctv/value_set.ixx
 )
 
-if(${ET_GTESTS})
-    FetchContent_MakeAvailable(googletest)
-endif()
+target_compile_features(ctv_value_set PUBLIC cxx_std_23)
 
-if(${ET_DOCTESTS})
+if(CTV_BUILD_TESTS)
+    include(FetchContent)
+
+    FetchContent_Declare(
+        doctest
+        GIT_REPOSITORY https://github.com/doctest/doctest.git
+        GIT_TAG v2.4.12
+    )
+
     FetchContent_MakeAvailable(doctest)
+
+    add_executable(ctv_value_set_tests
+        test/test_ctv_value_set_tests.cpp
+    )
+
+    target_link_libraries(ctv_value_set_tests
+        PRIVATE
+            ctv_value_set
+            doctest::doctest
+    )
+
+    target_compile_features(ctv_value_set_tests PRIVATE cxx_std_23)
+
+    add_test(NAME ctv_value_set_tests COMMAND ctv_value_set_tests)
 endif()
-
-# -----------------------------------------------------------------------------
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Ensure the header unit is built before the main target
-
-add_library(et STATIC)
-
-target_sources(et
-               PUBLIC 
-               src/et.cpp)
-           
-target_compile_options(et
-               PUBLIC
-)
-
-target_include_directories(et
-                           SYSTEM
-                           PUBLIC
-                           include
-)
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-add_executable(et_main src/main.cpp)
-target_link_libraries(et_main  et)              
-
-if (${ET_UNITTESTS})     
-    enable_testing()
-    add_subdirectory(test)
-    message("Building unit tests")
-endif()
-
-# -----------------------------------------------------------------------------
-if(${ET_DOXYDOC})
-    find_package(Doxygen
-                 REQUIRED dot
-                 OPTIONAL_COMPONENTS mscgen dia)
-
-    doxygen_add_docs(etdox)
-endif()
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#if (ET_BUILD_THE_MANUAL)
-#    add_subdirectory(doc)
-#endif()
