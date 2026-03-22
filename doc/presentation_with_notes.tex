@@ -1,0 +1,61 @@
+
+\documentclass{beamer}
+\usetheme{Berlin}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
+
+\title{Compile-Time Sparse Vector Expressions}
+\author{Christian Kotz}
+\date{}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Evaluation = Projection on AST}
+
+\centering
+
+\begin{tikzpicture}[
+    node distance=1.6cm,
+    every node/.style={draw, circle, minimum size=8mm},
+    op/.style={draw, rectangle, minimum width=8mm, minimum height=8mm},
+    idx/.style={draw=none}
+]
+
+\node[op] (minus) {$-$};
+\node[op, below left=of minus] (plus) {$+$};
+\node[below right=of minus] (c) {$c$};
+
+\node[below left=of plus] (a) {$a$};
+\node[below right=of plus] (b) {$b$};
+
+\draw[->] (plus) -- (minus);
+\draw[->] (c) -- (minus);
+\draw[->] (a) -- (plus);
+\draw[->] (b) -- (plus);
+
+\node[idx, right=4cm of minus] (iset) {$I = \{1,4,5,9\}$};
+\draw[->, dashed] (iset) -- (minus);
+
+\node[idx, below=3.2cm of minus] (res) {
+$\begin{aligned}
+i=1 &\rightarrow eval\_at(1, expr) \\
+i=4 &\rightarrow eval\_at(4, expr) \\
+i=5 &\rightarrow eval\_at(5, expr) \\
+i=9 &\rightarrow eval\_at(9, expr)
+\end{aligned}$
+};
+
+\draw[->] (minus) -- (res);
+
+\end{tikzpicture}
+
+\vspace{1em}
+
+\textbf{Key idea:} Evaluate only selected indices.
+
+\end{frame}
+
+\end{document}

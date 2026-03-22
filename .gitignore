@@ -41,3 +41,13 @@
 *.dwo
 build/**
 .vscode/**
+doc/*.toc
+doc/*.aux
+doc/*.log
+doc/*.nav
+doc/*.snm
+doc/presentation.pdf
+doc/presentation_with_notes.pdf
+doc/*.fdb_latexmk
+doc/*.fls
+doc/*.vrb
