@@ -1,1 +1,0 @@
-// we link to gtestmain, so we don't need to define main here
