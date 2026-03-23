@@ -36,14 +36,12 @@ export namespace ctv
         {
         }
 
-        constexpr T const& operator[](std::size_t pos) const
+        /// \brief Read access by logical index. Missing indices behave as zero.
+        /// This demo deliberately provides read-only logical indexing.
+        constexpr T operator[](std::size_t pos) const
         {
-            return values[pos];
-        }
-
-        constexpr T& operator[](std::size_t pos)
-        {
-            return values[pos];
+            auto const idx = find_pos(IndexSet{}, pos);
+            return idx < 0 ? T{} : values[static_cast<std::size_t>(idx)];
         }
     };
 
@@ -64,37 +62,37 @@ export namespace ctv
     //--------------------------------------------------------------------------
 
     /// \brief Sum expression node.
-    template <expression L, expression R>
+    template <expression LHS, expression RHS>
     struct add_expr
     {
         using is_expression_tag = void;
-        using value_type = std::common_type_t<typename L::value_type, typename R::value_type>;
+        using value_type = std::common_type_t<typename LHS::value_type, typename RHS::value_type>;
 
-        L l;
-        R r;
+        LHS lhs;
+        RHS rhs;
     };
 
     /// \brief Difference expression node.
-    template <expression L, expression R>
+    template <expression LHS, expression RHS>
     struct sub_expr
     {
         using is_expression_tag = void;
-        using value_type = std::common_type_t<typename L::value_type, typename R::value_type>;
+        using value_type = std::common_type_t<typename LHS::value_type, typename RHS::value_type>;
 
-        L l;
-        R r;
+        LHS lhs;
+        RHS rhs;
     };
 
-    template <expression L, expression R>
-    constexpr auto operator+(L l, R r)
+    template <expression LHS, expression RHS>
+    constexpr auto operator+(LHS lhs, RHS rhs)
     {
-        return add_expr<L, R>{l, r};
+        return add_expr<LHS, RHS>{lhs, rhs};
     }
 
-    template <expression L, expression R>
-    constexpr auto operator-(L l, R r)
+    template <expression LHS, expression RHS>
+    constexpr auto operator-(LHS lhs, RHS rhs)
     {
-        return sub_expr<L, R>{l, r};
+        return sub_expr<LHS, RHS>{lhs, rhs};
     }
 
     /// \brief Compute the natural support set of an expression.
@@ -151,17 +149,17 @@ export namespace ctv
     }
 
     /// \brief Evaluate one logical index of a sum expression.
-    template <typename U, expression L, expression R>
-    constexpr auto eval_at(U i, add_expr<L, R> const& e)
+    template <typename U, expression LHS, expression RHS>
+    constexpr auto eval_at(U i, add_expr<LHS, RHS> const& e)
     {
-        return eval_at(i, e.l) + eval_at(i, e.r);
+        return eval_at(i, e.lhs) + eval_at(i, e.rhs);
     }
 
     /// \brief Evaluate one logical index of a difference expression.
-    template <typename U, expression L, expression R>
-    constexpr auto eval_at(U i, sub_expr<L, R> const& e)
+    template <typename U, expression LHS, expression RHS>
+    constexpr auto eval_at(U i, sub_expr<LHS, RHS> const& e)
     {
-        return eval_at(i, e.l) - eval_at(i, e.r);
+        return eval_at(i, e.lhs) - eval_at(i, e.rhs);
     }
 
     /// \brief Materialize an expression on an explicitly requested target support set.

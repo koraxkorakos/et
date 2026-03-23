@@ -5,15 +5,16 @@ import ctv.value_set;
 import ctv.sparse_vector_demo;
 
 #include <type_traits>
+#include <utility>
 
-TEST_CASE("sparse_vector terminal basics")
+TEST_CASE("sparse_vector terminal basics using logical indices")
 {
     using I = ctv::index_set<1, 3, 5>;
     ctv::sparse_vector<I, int> v{{10, 30, 50}};
 
-    CHECK(v.values[0] == 10);
-    CHECK(v.values[1] == 30);
-    CHECK(v.values[2] == 50);
+    CHECK(v[1] == 10);
+    CHECK(v[3] == 30);
+    CHECK(v[5] == 50);
 
     CHECK(ctv::eval_at(1, v) == 10);
     CHECK(ctv::eval_at(3, v) == 30);
@@ -102,10 +103,10 @@ TEST_CASE("evaluate on explicit target support set")
 
     auto result = ctv::evaluate<ctv::index_set<1, 4, 5, 9>>(a + b);
 
-    CHECK(result.values[0] == 10);
-    CHECK(result.values[1] == 400);
-    CHECK(result.values[2] == 550);
-    CHECK(result.values[3] == 0);
+    CHECK(result[1] == 10);
+    CHECK(result[4] == 400);
+    CHECK(result[5] == 550);
+    CHECK(result[9] == 0);
 
     using R = decltype(result);
     CHECK(std::is_same_v<R, ctv::sparse_vector<ctv::index_set<1, 4, 5, 9>, int>>);
@@ -121,10 +122,10 @@ TEST_CASE("evaluate on full natural support")
     using R = decltype(result);
     CHECK(std::is_same_v<R, ctv::sparse_vector<ctv::index_set<1, 3, 4, 5>, int>>);
 
-    CHECK(result.values[0] == 10);
-    CHECK(result.values[1] == 330);
-    CHECK(result.values[2] == 400);
-    CHECK(result.values[3] == 550);
+    CHECK(result[1] == 10);
+    CHECK(result[3] == 330);
+    CHECK(result[4] == 400);
+    CHECK(result[5] == 550);
 }
 
 TEST_CASE("project is alias for explicit evaluation")
@@ -136,9 +137,9 @@ TEST_CASE("project is alias for explicit evaluation")
     using P = decltype(p);
     CHECK(std::is_same_v<P, ctv::sparse_vector<ctv::index_set<3, 5, 8>, int>>);
 
-    CHECK(p.values[0] == 30);
-    CHECK(p.values[1] == 50);
-    CHECK(p.values[2] == 0);
+    CHECK(p[3] == 30);
+    CHECK(p[5] == 50);
+    CHECK(p[8] == 0);
 }
 
 TEST_CASE("mixed support nested expression explicit projection")
@@ -150,12 +151,12 @@ TEST_CASE("mixed support nested expression explicit projection")
     auto expr = a + b - c;
     auto result = ctv::project<ctv::index_set<1, 2, 3, 5, 8, 9>>(expr);
 
-    CHECK(result.values[0] == 3);    // 10 + 0 - 7
-    CHECK(result.values[1] == 20);   // 0 + 20 - 0
-    CHECK(result.values[2] == 330);  // 30 + 300 - 0
-    CHECK(result.values[3] == 50);   // 50 + 0 - 0
-    CHECK(result.values[4] == 791);  // 0 + 800 - 9
-    CHECK(result.values[5] == 0);    // absent
+    CHECK(result[1] == 3);
+    CHECK(result[2] == 20);
+    CHECK(result[3] == 330);
+    CHECK(result[5] == 50);
+    CHECK(result[8] == 791);
+    CHECK(result[9] == 0);
 }
 
 TEST_CASE("default constructed sparse_vector behaves as zero terminal")
