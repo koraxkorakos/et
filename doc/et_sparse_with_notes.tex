@@ -1,0 +1,514 @@
+\documentclass{beamer}
+\usetheme{Berlin}
+\setbeameroption{show notes}
+
+\usepackage{xcolor}
+\usepackage{listings}
+
+\lstset{
+    language=C++,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    frame=single,
+    breaklines=true,
+    columns=fullflexible
+} 
+
+\day=26\relax
+\month=03\relax
+\year=2026\relax
+
+\title{Compile-Time Sparse Vector Expressions}
+\subtitle{Expression Templates with Projection}
+\author{Christian Kotz}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+%--------------------------------------------------
+
+\begin{frame}{Motivation}
+\note{
+
+Start calmly.
+
+Key line:
+"Sparse data is everywhere, but we often compute far more than needed."
+
+If asked:
+Q: Why compile-time?
+A: Because the support set becomes part of the type system.
+
+}
+
+\begin{itemize}
+\item Sparse data structures appear everywhere
+\item Classical evaluation computes \emph{everything}
+\item Often we only need a \emph{small subset} of indices
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Goal:}
+\begin{itemize}
+\item Build expressions lazily
+\item Evaluate only the indices we actually need
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Expression Templates (recap)}
+\note{
+
+Keep this short.
+
+Say:
+"We build an AST instead of computing."
+
+Avoid deep internals.
+
+}
+
+\begin{lstlisting}
+auto expr = a + b - c;
+\end{lstlisting}
+
+\vspace{1em}
+
+Builds an AST:
+\begin{itemize}
+\item nodes: operations (+, -)
+\item leaves: values
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Idea:} delay evaluation
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Key Idea: Projection}
+\note{
+
+Slow down.
+
+Say:
+"Evaluation is projection onto a compile-time index set."
+
+Pause.
+
+If asked:
+Q: Lazy?
+A: Yes, but with explicit control.
+
+}
+
+\begin{lstlisting}
+using I = ctv::index_set<1,4,5,9>;
+
+auto result = evaluate<I>(a + b - c);
+\end{lstlisting}
+
+\vspace{1em}
+
+\textbf{Meaning:}
+
+\begin{itemize}
+\item Only indices in $I$ are evaluated
+\item Everything else is treated as zero
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Interpretation:}
+\begin{itemize}
+\item evaluation = projection onto a support set
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Evaluation = Projection on AST}
+\note{
+
+Walk the diagram.
+
+Say:
+"We don't traverse the tree — we query it."
+
+Pause after this sentence.
+
+}
+
+\begin{columns}[T]
+\begin{column}{0.45\textwidth}
+\textbf{AST}
+
+\begin{verbatim}
+      (-)
+     /   \
+   (+)    c
+  /   \
+ a     b
+\end{verbatim}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\textbf{Projection set}
+
+\[
+I = \{1,4,5,9\}
+\]
+
+\vspace{0.5em}
+
+\textbf{Queried indices}
+
+\[
+\begin{aligned}
+1 &\mapsto eval\_at(1, expr) \\
+4 &\mapsto eval\_at(4, expr) \\
+5 &\mapsto eval\_at(5, expr) \\
+9 &\mapsto eval\_at(9, expr)
+\end{aligned}
+\]
+\end{column}
+\end{columns}
+
+\vspace{0.8em}
+
+\textbf{Key idea:} We do not traverse the tree --- we query it.
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Terminal: sparse\_vector}
+\note{
+
+Say:
+"This is a minimal demo container."
+
+If asked:
+Why array?
+Because indices are fixed at compile time.
+
+}
+
+\begin{lstlisting}
+template <typename IndexSet, typename T>
+struct sparse_vector
+{
+    using index_set = IndexSet;
+    using value_type = T;
+
+    std::array<T, IndexSet::size> values;
+};
+\end{lstlisting}
+
+\vspace{1em}
+
+\begin{itemize}
+\item compile-time support set
+\item dense storage over sparse indices
+\item also acts as expression terminal
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Expression Nodes}
+\note{
+
+Say:
+"No computation here — just structure."
+
+If asked about references:
+Production would use references.
+
+}
+
+\begin{lstlisting}
+template <typename LHS, typename RHS>
+struct add_expr
+{
+    LHS lhs;
+    RHS rhs;
+};
+\end{lstlisting}
+
+\vspace{1em}
+
+\begin{lstlisting}
+auto expr = a + b;
+\end{lstlisting}
+
+\vspace{1em}
+
+\begin{itemize}
+\item builds AST
+\item no computation yet
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Evaluation per Index}
+\note{
+
+Key slide.
+
+Say:
+"Evaluation happens per index."
+
+If asked efficiency:
+Depends on usage pattern.
+
+}
+
+\begin{lstlisting}
+eval_at(i, expr)
+\end{lstlisting}
+
+\vspace{1em}
+
+Recursive:
+
+\begin{lstlisting}
+eval_at(i, a + b)
+= eval_at(i, a) + eval_at(i, b)
+\end{lstlisting}
+
+\vspace{1em}
+
+Terminal:
+
+\begin{lstlisting}
+eval_at(i, sparse_vector)
+\end{lstlisting}
+
+returns value or 0
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Materialization}
+\note{
+
+Say:
+"Work happens here."
+
+Key:
+"Work scales with requested indices."
+
+}
+
+\begin{lstlisting}
+evaluate<I>(expr)
+\end{lstlisting}
+
+\vspace{1em}
+
+\begin{itemize}
+\item iterate over compile-time index set
+\item compute each entry via code \lstinline!eval_at!
+\item store in array
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Key point:}
+\begin{itemize}
+\item work is proportional to requested indices
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Full Support Set}
+\note{
+
+Say:
+"Union of supports."
+
+If asked:
+Cost? Compile-time only.
+
+}
+
+\begin{lstlisting}
+full_index_set_t<Expr>
+\end{lstlisting}
+
+\vspace{1em}
+
+\begin{itemize}
+\item computed from AST
+\item union of all terminal supports
+\end{itemize}
+
+\vspace{1em}
+
+\begin{lstlisting}
+evaluate(expr)
+\end{lstlisting}
+
+\vspace{1em}
+
+\begin{itemize}
+\item evaluates on natural support
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}[fragile]{Example}
+\note{
+
+Walk slowly.
+
+Do not rush numbers.
+
+}
+
+\begin{lstlisting}
+a: {1,3,5}
+b: {3,4,5}
+
+expr = a + b
+\end{lstlisting}
+
+\vspace{1em}
+
+Full support:
+
+\begin{itemize}
+\item {1,3,4,5}
+\end{itemize}
+
+\vspace{1em}
+
+\begin{lstlisting}
+evaluate<{1,5}>(expr)
+\end{lstlisting}
+
+\begin{itemize}
+\item only computes 1 and 5
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}{Design Decision}
+\note{
+
+Say:
+"Value semantics for safety."
+
+Production would optimize.
+
+}
+
+\textbf{Operands stored by value}
+
+\vspace{1em}
+
+\begin{itemize}
+\item safe for temporaries
+\item avoids lifetime bugs
+\item simpler mental model
+\end{itemize}
+
+\vspace{1em}
+
+Production approach:
+
+\begin{itemize}
+\item lvalues $\rightarrow$ reference
+\item rvalues $\rightarrow$ move
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}{Summary}
+\note{
+
+Repeat:
+
+"Evaluation = projection."
+
+Make this stick.
+
+}
+
+\begin{itemize}
+\item Expression templates build an AST
+\item Evaluation is delayed
+\item We add: evaluation restricted by index set
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Core idea:}
+
+\begin{itemize}
+\item evaluation = projection onto support set
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Result:}
+
+\begin{itemize}
+\item compute only what is needed
+\end{itemize}
+
+\end{frame}
+
+%--------------------------------------------------
+
+\begin{frame}{Outlook}
+\note{
+
+Keep light.
+
+Mention future extensions briefly.
+
+}
+
+\begin{itemize}
+\item context-driven evaluation
+\item symbolic variables
+\item Clifford / geometric algebra
+\item index-dependent operations
+\end{itemize}
+
+\vspace{1em}
+
+\textbf{Key idea remains:}
+
+\begin{itemize}
+\item projection + context
+\end{itemize}
+
+\end{frame}
+
+\end{document}
