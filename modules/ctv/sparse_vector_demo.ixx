@@ -2,6 +2,7 @@ module;
 #include <array>
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <type_traits>
 #include <utility>
 
@@ -38,7 +39,7 @@ export namespace ctv
 
         /// \brief Read access by logical index. Missing indices behave as zero.
         /// This demo deliberately provides read-only logical indexing.
-        constexpr T operator[](std::size_t pos) const
+        constexpr T operator[](std::uintmax_t pos) const
         {
             auto const idx = find_pos(IndexSet{}, pos);
             return idx < 0 ? T{} : values[static_cast<std::size_t>(idx)];
