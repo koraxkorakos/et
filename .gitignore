@@ -51,3 +51,5 @@ doc/presentation_with_notes.pdf
 doc/*.fdb_latexmk
 doc/*.fls
 doc/*.vrb
+doc/et_sparse.pdf
+doc/*.synctex.gz
