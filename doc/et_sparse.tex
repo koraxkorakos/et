@@ -170,11 +170,11 @@ struct sparse_vector
 \begin{frame}[fragile]{Expression Nodes}
 
 \begin{lstlisting}
-template <typename L, typename R>
+template <typename LHS, typename RHS>
 struct add_expr
 {
-    L l;
-    R r;
+    LHS lhs;
+    RHS rhs;
 };
 \end{lstlisting}
 
@@ -234,7 +234,7 @@ evaluate<I>(expr)
 
 \begin{itemize}
 \item iterate over compile-time index set
-\item compute each entry via eval\_at
+\item compute each entry via code \lstinline!eval_at!
 \item store in array
 \end{itemize}
 
