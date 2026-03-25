@@ -53,3 +53,4 @@ doc/*.fls
 doc/*.vrb
 doc/et_sparse.pdf
 doc/*.synctex.gz
+doc/et_sparse_with_notes.pdf
