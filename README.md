@@ -34,9 +34,22 @@ A small C++23 compile-time library using C++ modules and doctest.
 
 ## Project structure
 
+
+├── bin
+├── doc
+|   ├── presentation.tex
+|   └── presentation_with_notes.tex
+├── lib
+├── modules
+|   ├── sparse_vector_demo.ixx
+|   └── value_set.cpp
+├── test
+|   ├── test_ctv_sparse_vector_demo_tests.cpp
+|   └── test_ctv_value_set_tests.cpp
+├── .gitignore
 ├── CMakeLists.txt
-├── ctv.value_set.ixx
-└── test_ctv_value_set.cpp
+├── LICENSE
+└── Readme.md
 
 
 ## Build & run tests
@@ -67,17 +80,20 @@ It requires that you have `pdflatex` installed along with the LaTeX packages use
 
 ## Notes
 
-- The module interface unit is: 
+- The module interface unit are: 
 
   `ctv.value_set.ixx`
+  `sparse_vector_demo.ixx`
 
-- The library target is:
+- The library target are:
 
   `ctv.value_set`
+  `ctv.sparse_vector_demo`
 
 - Namespaced alias:
 
   `ctv.value_set`
+  `ctv.sparse_vector_demo`
 
 Tests use doctest, fetched automatically via CMake FetchContent.
 
