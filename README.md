@@ -53,6 +53,18 @@ ctest --test-dir build --output-on-failure
 cmake -S . -B build -G Ninja -DCTV_BUILD_TESTS=OFF
 ```
 
+## Building the Presentation Slides
+
+From the `build directory` issue: 
+
+```bash
+ninja presentation
+ninja presentation_with_notes
+```
+
+This will build the presentation slides in the `build` directory. 
+It requires that you have `pdflatex` installed along with the LaTeX packages used. 
+
 ## Notes
 
 - The module interface unit is: 

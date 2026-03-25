@@ -83,3 +83,51 @@ if(CTV_BUILD_TESTS)
     add_test(NAME ctv_value_set_tests COMMAND ctv_value_set_tests)
     add_test(NAME ctv_sparse_vector_demo_tests COMMAND ctv_sparse_vector_demo_tests)
 endif()
+# ---- Documentation (LaTeX) ----
+
+find_program(PDFLATEX_EXECUTABLE pdflatex)
+
+if(PDFLATEX_EXECUTABLE)
+
+    set(DOC_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/doc)
+    set(DOC_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+    # ---- presentation.tex ----
+    add_custom_command(
+        OUTPUT ${DOC_BINARY_DIR}/presentation.pdf
+        COMMAND ${PDFLATEX_EXECUTABLE}
+                -interaction=nonstopmode
+                -halt-on-error
+                -output-directory ${DOC_BINARY_DIR}
+                ${DOC_SOURCE_DIR}/presentation.tex
+        WORKING_DIRECTORY ${DOC_SOURCE_DIR}
+        DEPENDS ${DOC_SOURCE_DIR}/presentation.tex
+        COMMENT "Building presentation.pdf"
+        VERBATIM
+    )
+
+    add_custom_target(presentation
+        DEPENDS ${DOC_BINARY_DIR}/presentation.pdf
+    )
+
+    # ---- presentation_with_notes.tex ----
+    add_custom_command(
+        OUTPUT ${DOC_BINARY_DIR}/presentation_with_notes.pdf
+        COMMAND ${PDFLATEX_EXECUTABLE}
+                -interaction=nonstopmode
+                -halt-on-error
+                -output-directory ${DOC_BINARY_DIR}
+                ${DOC_SOURCE_DIR}/presentation_with_notes.tex
+        WORKING_DIRECTORY ${DOC_SOURCE_DIR}
+        DEPENDS ${DOC_SOURCE_DIR}/presentation_with_notes.tex
+        COMMENT "Building presentation_with_notes.pdf"
+        VERBATIM
+    )
+
+    add_custom_target(presentation_with_notes
+        DEPENDS ${DOC_BINARY_DIR}/presentation_with_notes.pdf
+    )
+
+else()
+    message(WARNING "pdflatex not found - presentation targets disabled")
+endif()
