@@ -35,8 +35,11 @@
 \begin{frame}{Motivation}
 \note{
 - sparse data everywhere
+
 - often compute too much
+
 - goal: compute only needed indices
+
 - quick setup, then core idea
 }
 \begin{itemize}
@@ -60,8 +63,11 @@
 \begin{frame}[fragile]{Expression Templates (recap)}
 \note{
 - very short recap
+
 - AST instead of immediate evaluation
+
 - do not go into internals
+
 - move quickly to projection
 }
 \begin{lstlisting}
@@ -87,9 +93,13 @@ Builds an AST:
 \begin{frame}[fragile]{Key Idea: Projection}
 \note{
 - key idea
+
 - evaluation as projection onto index set
+
 - evaluate only selected indices
+
 - do not evaluate whole expression
+
 - pause
 }
 \begin{lstlisting}
@@ -121,9 +131,13 @@ auto result = evaluate<I>(a + b - c);
 \begin{frame}[fragile]{Evaluation = Projection on AST}
 \note{
 - tree on left, index set on right
+
 - ask only for selected indices
+
 - do not traverse whole tree
+
 - we query it
+
 - pause after that line
 }
 \begin{columns}[T]
@@ -172,9 +186,13 @@ I = \{1,4,5,9\}
 \begin{frame}[fragile]{Terminal: sparse\_vector}
 \note{
 - minimal demo container
+
 - compile time support set
+
 - dense storage over sparse indices
+
 - terminal expression node
+
 }
 \begin{lstlisting}
 template <typename IndexSet, typename T>
@@ -202,8 +220,11 @@ struct sparse_vector
 \begin{frame}[fragile]{Expression Nodes}
 \note{
 - only structure
+
 - no computation yet
+
 - value semantics on purpose
+
 - details in demo project
 }
 \begin{lstlisting}
@@ -235,9 +256,13 @@ auto expr = a + b;
 \begin{frame}[fragile]{Evaluation per Index}
 \note{
 - one index at a time
+
 - recursive query
+
 - add: combine left and right at same index
+
 - terminal: value or zero
+
 - this is the mechanism
 }
 \begin{lstlisting}
@@ -270,8 +295,11 @@ returns value or 0
 \begin{frame}[fragile]{Materialization}
 \note{
 - now actual work happens
-- for each requested index: eval at
+
+- for each requested index: \lstinline|code|eval at|
+
 - build result array
+
 - work scales with requested indices
 }
 \begin{lstlisting}
@@ -300,8 +328,11 @@ evaluate<I>(expr)
 \begin{frame}[fragile]{Full Support Set}
 \note{
 - natural support from AST
+
 - union of terminal supports
+
 - evaluate without explicit target set
+
 - keep this brief
 }
 \begin{lstlisting}
@@ -334,8 +365,11 @@ evaluate(expr)
 \begin{frame}[fragile]{Example}
 \note{
 - walk slowly
+
 - support of a plus b is union
+
 - projection picks only requested indices
+
 - do not over explain arithmetic
 }
 \begin{lstlisting}
@@ -370,8 +404,11 @@ evaluate<{1,5}>(expr)
 \begin{frame}{Design Decision}
 \note{
 - by value for safety
+
 - avoids temporary lifetime bugs
+
 - production would use closure strategy
+
 - do not go deep here
 }
 \textbf{Operands stored by value}
@@ -400,8 +437,11 @@ Production approach:
 \begin{frame}{Summary}
 \note{
 - expression templates build AST
+
 - projection restricts evaluation
+
 - evaluate only what we need
+
 - this is the one idea to remember
 }
 \begin{itemize}
@@ -433,8 +473,11 @@ Production approach:
 \begin{frame}{Outlook}
 \note{
 - future: context, symbolic variables, richer operations
+
 - convolution is easy audience example
+
 - Clifford only if asked
+
 - finish and invite questions
 }
 \begin{itemize}
