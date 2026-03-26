@@ -34,18 +34,11 @@
 
 \begin{frame}{Motivation}
 \note{
-
-Start calmly.
-
-Key line:
-"Sparse data is everywhere, but we often compute far more than needed."
-
-If asked:
-Q: Why compile-time?
-A: Because the support set becomes part of the type system.
-
+- sparse data everywhere
+- often compute too much
+- goal: compute only needed indices
+- quick setup, then core idea
 }
-
 \begin{itemize}
 \item Sparse data structures appear everywhere
 \item Classical evaluation computes \emph{everything}
@@ -66,16 +59,11 @@ A: Because the support set becomes part of the type system.
 
 \begin{frame}[fragile]{Expression Templates (recap)}
 \note{
-
-Keep this short.
-
-Say:
-"We build an AST instead of computing."
-
-Avoid deep internals.
-
+- very short recap
+- AST instead of immediate evaluation
+- do not go into internals
+- move quickly to projection
 }
-
 \begin{lstlisting}
 auto expr = a + b - c;
 \end{lstlisting}
@@ -98,20 +86,12 @@ Builds an AST:
 
 \begin{frame}[fragile]{Key Idea: Projection}
 \note{
-
-Slow down.
-
-Say:
-"Evaluation is projection onto a compile-time index set."
-
-Pause.
-
-If asked:
-Q: Lazy?
-A: Yes, but with explicit control.
-
+- key idea
+- evaluation as projection onto index set
+- evaluate only selected indices
+- do not evaluate whole expression
+- pause
 }
-
 \begin{lstlisting}
 using I = ctv::index_set<1,4,5,9>;
 
@@ -140,16 +120,12 @@ auto result = evaluate<I>(a + b - c);
 
 \begin{frame}[fragile]{Evaluation = Projection on AST}
 \note{
-
-Walk the diagram.
-
-Say:
-"We don't traverse the tree — we query it."
-
-Pause after this sentence.
-
+- tree on left, index set on right
+- ask only for selected indices
+- do not traverse whole tree
+- we query it
+- pause after that line
 }
-
 \begin{columns}[T]
 \begin{column}{0.45\textwidth}
 \textbf{AST}
@@ -195,16 +171,11 @@ I = \{1,4,5,9\}
 
 \begin{frame}[fragile]{Terminal: sparse\_vector}
 \note{
-
-Say:
-"This is a minimal demo container."
-
-If asked:
-Why array?
-Because indices are fixed at compile time.
-
+- minimal demo container
+- compile time support set
+- dense storage over sparse indices
+- terminal expression node
 }
-
 \begin{lstlisting}
 template <typename IndexSet, typename T>
 struct sparse_vector
@@ -230,15 +201,11 @@ struct sparse_vector
 
 \begin{frame}[fragile]{Expression Nodes}
 \note{
-
-Say:
-"No computation here — just structure."
-
-If asked about references:
-Production would use references.
-
+- only structure
+- no computation yet
+- value semantics on purpose
+- details in demo project
 }
-
 \begin{lstlisting}
 template <typename LHS, typename RHS>
 struct add_expr
@@ -267,17 +234,12 @@ auto expr = a + b;
 
 \begin{frame}[fragile]{Evaluation per Index}
 \note{
-
-Key slide.
-
-Say:
-"Evaluation happens per index."
-
-If asked efficiency:
-Depends on usage pattern.
-
+- one index at a time
+- recursive query
+- add: combine left and right at same index
+- terminal: value or zero
+- this is the mechanism
 }
-
 \begin{lstlisting}
 eval_at(i, expr)
 \end{lstlisting}
@@ -307,15 +269,11 @@ returns value or 0
 
 \begin{frame}[fragile]{Materialization}
 \note{
-
-Say:
-"Work happens here."
-
-Key:
-"Work scales with requested indices."
-
+- now actual work happens
+- for each requested index: eval at
+- build result array
+- work scales with requested indices
 }
-
 \begin{lstlisting}
 evaluate<I>(expr)
 \end{lstlisting}
@@ -341,15 +299,11 @@ evaluate<I>(expr)
 
 \begin{frame}[fragile]{Full Support Set}
 \note{
-
-Say:
-"Union of supports."
-
-If asked:
-Cost? Compile-time only.
-
+- natural support from AST
+- union of terminal supports
+- evaluate without explicit target set
+- keep this brief
 }
-
 \begin{lstlisting}
 full_index_set_t<Expr>
 \end{lstlisting}
@@ -379,13 +333,11 @@ evaluate(expr)
 
 \begin{frame}[fragile]{Example}
 \note{
-
-Walk slowly.
-
-Do not rush numbers.
-
+- walk slowly
+- support of a plus b is union
+- projection picks only requested indices
+- do not over explain arithmetic
 }
-
 \begin{lstlisting}
 a: {1,3,5}
 b: {3,4,5}
@@ -417,14 +369,11 @@ evaluate<{1,5}>(expr)
 
 \begin{frame}{Design Decision}
 \note{
-
-Say:
-"Value semantics for safety."
-
-Production would optimize.
-
+- by value for safety
+- avoids temporary lifetime bugs
+- production would use closure strategy
+- do not go deep here
 }
-
 \textbf{Operands stored by value}
 
 \vspace{1em}
@@ -450,15 +399,11 @@ Production approach:
 
 \begin{frame}{Summary}
 \note{
-
-Repeat:
-
-"Evaluation = projection."
-
-Make this stick.
-
+- expression templates build AST
+- projection restricts evaluation
+- evaluate only what we need
+- this is the one idea to remember
 }
-
 \begin{itemize}
 \item Expression templates build an AST
 \item Evaluation is delayed
@@ -487,13 +432,11 @@ Make this stick.
 
 \begin{frame}{Outlook}
 \note{
-
-Keep light.
-
-Mention future extensions briefly.
-
+- future: context, symbolic variables, richer operations
+- convolution is easy audience example
+- Clifford only if asked
+- finish and invite questions
 }
-
 \begin{itemize}
 \item context-driven evaluation
 \item symbolic variables
