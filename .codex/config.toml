@@ -1,0 +1,33 @@
+# --- Model ---
+model = "gpt-5"
+
+# --- Safety / Control ---
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# --- Behavior ---
+verbosity = "medium"
+reasoning_effort = "high"
+
+# --- File handling ---
+respect_gitignore = true
+
+# --- Editing style ---
+apply_patch_style = "minimal"
+
+# --- Shell / commands ---
+allow_shell_commands = true
+shell_command_mode = "confirm"
+
+# --- Language focus ---
+preferred_languages = ["cpp", "c", "cmake", "python"]
+
+# --- Performance ---
+index_workspace = true
+max_file_scan_size_kb = 512
+
+# --- Diff friendliness ---
+preserve_formatting = true
+
+# --- Safety ---
+allow_network = false
