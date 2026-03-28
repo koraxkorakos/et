@@ -118,3 +118,8 @@ You can extend this structure with:
 - `ctv.clifford`
 
 - `ctv.tensor`
+
+## Acknowledgements
+
+This project was partially developed with the assistance of ChatGPT (OpenAI).
+The author retains full responsibility for the design, implementation, and correctness of the code.

@@ -15,6 +15,20 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_C_COMPILER": "/usr/bin/gcc",
         "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "gcc15-debug",
+      "displayName": "GCC 15.2 Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/Gcc15Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "/usr/bin/gcc-15",
+        "CMAKE_CXX_COMPILER": "/usr/bin/g++-15",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "ON",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
@@ -27,6 +41,20 @@
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_C_COMPILER": "/usr/bin/gcc",
         "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "gcc15-release",
+      "displayName": "GCC 15.2 Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/Gcc15Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "/usr/bin/gcc-15",
+        "CMAKE_CXX_COMPILER": "/usr/bin/g++-15",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "ON",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
@@ -39,6 +67,7 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_C_COMPILER": "/usr/bin/clang",
         "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "ON",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     }
@@ -49,8 +78,16 @@
       "configurePreset": "gcc-debug"
     },
     {
+      "name": "build-gcc15-debug",
+      "configurePreset": "gcc15-debug"
+    },
+    {
       "name": "build-gcc-release",
       "configurePreset": "gcc-release"
+    },
+    {
+      "name": "build-gcc15-release",
+      "configurePreset": "gcc15-release"
     },
     {
       "name": "build-clang-debug",
@@ -61,6 +98,13 @@
     {
       "name": "test-gcc-debug",
       "configurePreset": "gcc-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "test-gcc15-debug",
+      "configurePreset": "gcc15-debug",
       "output": {
         "outputOnFailure": true
       }

@@ -9,5 +9,10 @@
     "--clang-tidy",
     "--completion-style=detailed",
     "--header-insertion=iwyu"
-  ]
+  ],
+  "chatgpt.openOnStartup": false,
+  "chatgpt.localeOverride": "en",
+  "chatgpt.commentCodeLensEnabled": false,
+  "chat.fontSize": 13,
+  "chat.editor.fontSize": 13
 }
