@@ -1,0 +1,54 @@
+Checks: >
+  clang-analyzer-*,
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  readability-*,
+  portability-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-exception-escape,
+  -bugprone-narrowing-conversions,
+  -modernize-use-trailing-return-type,
+  -modernize-avoid-c-arrays,
+  -modernize-use-auto,
+  -modernize-pass-by-value,
+  -readability-identifier-length,
+  -readability-identifier-naming,
+  -readability-magic-numbers,
+  -readability-function-cognitive-complexity,
+  -readability-convert-member-functions-to-static,
+  -readability-isolate-declaration,
+  -readability-implicit-bool-conversion,
+  -readability-qualified-auto,
+  -readability-redundant-access-specifiers,
+  -readability-braces-around-statements,
+  -performance-unnecessary-value-param,
+  -performance-inefficient-vector-operation,
+  -portability-simd-intrinsics
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+ExcludeHeaderFilterRegex: '(.*/build/.*|.*/_deps/.*|.*/third_party/.*|.*/external/.*|.*/tests?/golden/.*)'
+FormatStyle: file
+SystemHeaders: false
+UseColor: true
+
+CheckOptions:
+  - key: bugprone-branch-clone.MinComplexity
+    value: '10'
+  - key: modernize-loop-convert.MinConfidence
+    value: reasonable
+  - key: readability-function-size.LineThreshold
+    value: '400'
+  - key: readability-function-size.StatementThreshold
+    value: '300'
+  - key: readability-function-size.BranchThreshold
+    value: '80'
+  - key: readability-function-size.ParameterThreshold
+    value: '12'
+  - key: readability-function-size.NestingThreshold
+    value: '8'
+  - key: readability-function-size.VariableThreshold
+    value: '40'
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: 'false'

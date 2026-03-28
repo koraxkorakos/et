@@ -1,0 +1,88 @@
+BasedOnStyle: LLVM
+
+# Core
+IndentWidth: 2
+ContinuationIndentWidth: 4
+TabWidth: 2
+UseTab: Never
+ColumnLimit: 120
+Standard: Latest
+
+# Compactness
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortLambdasOnASingleLine: All
+AllowShortEnumsOnASingleLine: true
+
+# Keep template / call syntax dense
+AlwaysBreakTemplateDeclarations: No
+BreakTemplateDeclarations: No
+PenaltyBreakTemplateDeclaration: 10000
+PenaltyBreakBeforeFirstCallParameter: 10000
+PenaltyBreakOpenParenthesis: 0
+PenaltyBreakAssignment: 25
+PenaltyBreakComment: 300
+PenaltyExcessCharacter: 2
+PenaltyReturnTypeOnItsOwnLine: 10000
+
+# Function decls / calls
+BinPackArguments: true
+BinPackParameters: true
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+PackConstructorInitializers: NextLine
+ConstructorInitializerIndentWidth: 4
+
+# Modern C++
+BreakBeforeConceptDeclarations: Never
+RequiresClausePosition: WithPreceding
+RequiresExpressionIndentation: OuterScope
+SpaceBeforeParens: ControlStatements
+SpaceBeforeCpp11BracedList: false
+SpacesInAngles: Never
+SpacesInContainerLiterals: false
+Cpp11BracedListStyle: true
+
+# Pointers / references
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Namespaces / access
+NamespaceIndentation: None
+EmptyLineBeforeAccessModifier: LogicalBlock
+IndentAccessModifiers: false
+
+# Includes
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
+
+# Comments
+ReflowComments: false
+AlignTrailingComments: true
+CommentPragmas: '^ IWYU pragma:|^ clang-format (on|off)$'
+
+# Wrapped expressions / pipelines / templates
+AlignAfterOpenBracket: DontAlign
+BreakBeforeBinaryOperators: NonAssignment
+PenaltyIndentedWhitespace: 0
+
+# Keep single-line things single-line where possible
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+
+# Avoid alignment churn in diffs
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+
+# Raw strings
+RawStringFormats:
+  - Language: TextProto
+    Delimiters: [pb, proto]
+    BasedOnStyle: google
+  - Language: Cpp
+    Delimiters: [cc, cpp]
+    BasedOnStyle: LLVM
