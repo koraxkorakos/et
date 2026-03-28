@@ -65,8 +65,9 @@
       "binaryDir": "${sourceDir}/build/ClangDebug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_C_COMPILER": "/usr/bin/clang",
-        "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+        "CMAKE_C_COMPILER": "/usr/bin/clang-23",
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++-23",
+        "CMAKE_CXX_STANDARD": "23",
         "CMAKE_CXX_SCAN_FOR_MODULES": "ON",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
