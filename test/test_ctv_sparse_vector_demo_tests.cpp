@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
+import ctv.special_values;
 import ctv.value_set;
 import ctv.sparse_vector_demo;
 
@@ -66,6 +67,43 @@ TEST_CASE("nested additive group expressions")
     CHECK(ctv::eval_at(4, expr) == 391);
     CHECK(ctv::eval_at(5, expr) == 550);
     CHECK(ctv::eval_at(8, expr) == 0);
+}
+
+TEST_CASE("zero acts as additive identity for expressions")
+{
+    ctv::sparse_vector<ctv::index_set<1, 3, 5>, int> a{{10, 30, 50}};
+
+    auto left_plus = a + ctv::zero;
+    auto right_plus = ctv::zero + a;
+    auto minus_zero = a - ctv::zero;
+
+    CHECK(ctv::eval_at(1, left_plus) == 10);
+    CHECK(ctv::eval_at(3, left_plus) == 30);
+    CHECK(ctv::eval_at(5, left_plus) == 50);
+
+    CHECK(ctv::eval_at(1, right_plus) == 10);
+    CHECK(ctv::eval_at(3, right_plus) == 30);
+    CHECK(ctv::eval_at(5, right_plus) == 50);
+
+    CHECK(ctv::eval_at(1, minus_zero) == 10);
+    CHECK(ctv::eval_at(3, minus_zero) == 30);
+    CHECK(ctv::eval_at(5, minus_zero) == 50);
+}
+
+TEST_CASE("zero minus expression negates the expression")
+{
+    ctv::sparse_vector<ctv::index_set<1, 3, 5>, int> a{{10, 30, 50}};
+    ctv::sparse_vector<ctv::index_set<3, 4, 5>, int> b{{300, 400, 500}};
+
+    auto expr = ctv::zero - (a + b);
+
+    CHECK(ctv::eval_at(1, expr) == -10);
+    CHECK(ctv::eval_at(3, expr) == -330);
+    CHECK(ctv::eval_at(4, expr) == -400);
+    CHECK(ctv::eval_at(5, expr) == -550);
+
+    using F = ctv::full_index_set_t<decltype(expr)>;
+    CHECK(std::is_same_v<F, ctv::index_set<1, 3, 4, 5>>);
 }
 
 TEST_CASE("full_index_set of terminal")

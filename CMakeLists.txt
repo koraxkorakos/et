@@ -67,6 +67,31 @@ target_compile_features(ctv_value_set
 
 ctv_enable_sanitizers(ctv_value_set)
 
+# ---- Library: ctv_multivector ----
+
+add_library(ctv_multivector)
+add_library(ctv::multivector ALIAS ctv_multivector)
+
+target_sources(ctv_multivector
+  PUBLIC
+    FILE_SET cxx_modules TYPE CXX_MODULES
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+    FILES
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/ctv/multivector.ixx
+)
+
+target_compile_features(ctv_multivector
+  PUBLIC
+    cxx_std_23
+)
+
+target_link_libraries(ctv_multivector
+  PUBLIC
+    ctv_value_set
+)
+
+ctv_enable_sanitizers(ctv_multivector)
+
 # ---- Library: ctv_sparse_vector_demo ----
 
 add_library(ctv_sparse_vector_demo)
@@ -91,6 +116,31 @@ target_link_libraries(ctv_sparse_vector_demo
 )
 
 ctv_enable_sanitizers(ctv_sparse_vector_demo)
+
+# ---- Library: ctv_special_values ----
+
+add_library(ctv_special_values)
+add_library(ctv::special_values ALIAS ctv_special_values)
+
+target_sources(ctv_special_values
+  PUBLIC
+    FILE_SET cxx_modules TYPE CXX_MODULES
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+    FILES
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/ctv/special_values.ixx
+)
+
+target_compile_features(ctv_special_values
+  PUBLIC
+    cxx_std_23
+)
+
+ctv_enable_sanitizers(ctv_special_values)
+
+target_link_libraries(ctv_sparse_vector_demo
+  PUBLIC
+    ctv_special_values
+)
 
 # ---- Tests ----
 
@@ -128,6 +178,28 @@ if(CTV_BUILD_TESTS)
     COMMAND ctv_value_set_tests
   )
 
+  add_executable(ctv_multivector_tests
+    test/test_ctv_multivector_tests.cpp
+  )
+
+  target_link_libraries(ctv_multivector_tests
+    PRIVATE
+      ctv_multivector
+      doctest::doctest
+  )
+
+  target_compile_features(ctv_multivector_tests
+    PRIVATE
+      cxx_std_23
+  )
+
+  ctv_enable_sanitizers(ctv_multivector_tests)
+
+  add_test(
+    NAME ctv_multivector_tests
+    COMMAND ctv_multivector_tests
+  )
+
   add_executable(ctv_sparse_vector_demo_tests
     test/test_ctv_sparse_vector_demo_tests.cpp
   )
@@ -148,6 +220,28 @@ if(CTV_BUILD_TESTS)
   add_test(
     NAME ctv_sparse_vector_demo_tests
     COMMAND ctv_sparse_vector_demo_tests
+  )
+
+  add_executable(ctv_special_values_tests
+    test/test_ctv_special_values_tests.cpp
+  )
+
+  target_link_libraries(ctv_special_values_tests
+    PRIVATE
+      ctv_special_values
+      doctest::doctest
+  )
+
+  target_compile_features(ctv_special_values_tests
+    PRIVATE
+      cxx_std_23
+  )
+
+  ctv_enable_sanitizers(ctv_special_values_tests)
+
+  add_test(
+    NAME ctv_special_values_tests
+    COMMAND ctv_special_values_tests
   )
 endif()
 

@@ -8,6 +8,7 @@ module;
 
 export module ctv.sparse_vector_demo;
 
+import ctv.special_values;
 import ctv.value_set;
 
 export namespace ctv
@@ -84,6 +85,16 @@ export namespace ctv
         RHS rhs;
     };
 
+    /// \brief Unary negation expression node.
+    template <expression Expr>
+    struct neg_expr
+    {
+        using is_expression_tag = void;
+        using value_type = typename Expr::value_type;
+
+        Expr expr;
+    };
+
     template <expression LHS, expression RHS>
     constexpr auto operator+(LHS lhs, RHS rhs)
     {
@@ -94,6 +105,36 @@ export namespace ctv
     constexpr auto operator-(LHS lhs, RHS rhs)
     {
         return sub_expr<LHS, RHS>{lhs, rhs};
+    }
+
+    template <expression Expr>
+    constexpr auto operator-(Expr expr)
+    {
+        return neg_expr<Expr>{expr};
+    }
+
+    template <expression T>
+    constexpr auto operator+(T const& lhs, zero_type)
+    {
+        return lhs;
+    }
+
+    template <expression T>
+    constexpr auto operator+(zero_type, T const& rhs)
+    {
+        return rhs;
+    }
+
+    template <expression T>
+    constexpr auto operator-(T const& lhs, zero_type)
+    {
+        return lhs;
+    }
+
+    template <expression T>
+    constexpr auto operator-(zero_type, T const& rhs)
+    {
+        return -rhs;
     }
 
     /// \brief Compute the natural support set of an expression.
@@ -139,6 +180,12 @@ export namespace ctv
         using type = ctv::set_union_t<full_index_set_t<L>, full_index_set_t<R>>;
     };
 
+    template <expression Expr>
+    struct full_index_set<neg_expr<Expr>>
+    {
+        using type = full_index_set_t<Expr>;
+    };
+
     /// \brief Evaluate one logical index of a sparse vector terminal.
     /// Missing indices are treated as zero.
     template <typename IndexSet, typename T, typename U>
@@ -161,6 +208,13 @@ export namespace ctv
     constexpr auto eval_at(U i, sub_expr<LHS, RHS> const& e)
     {
         return eval_at(i, e.lhs) - eval_at(i, e.rhs);
+    }
+
+    /// \brief Evaluate one logical index of a negation expression.
+    template <typename U, expression Expr>
+    constexpr auto eval_at(U i, neg_expr<Expr> const& e)
+    {
+        return -eval_at(i, e.expr);
     }
 
     /// \brief Materialize an expression on an explicitly requested target support set.
