@@ -13,5 +13,13 @@
   "chatgpt.localeOverride": "en",
   "chatgpt.commentCodeLensEnabled": false,
   "chat.fontSize": 13,
-  "chat.editor.fontSize": 13
+  "chat.editor.fontSize": 13,
+  "cSpell.customDictionaries": {
+    "custom-dictionary-workspace": {
+      "name": "custom-dictionary-workspace",
+      "path": "${workspaceFolder:et}/.cspell/custom-dictionary-workspace.txt",
+      "addWords": true,
+      "scope": "workspace"
+    }
+  }
 }
