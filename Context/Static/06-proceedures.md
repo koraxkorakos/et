@@ -2,7 +2,7 @@
 
 ## Purpose of the Document
 
-In this file describes the development process and its ivariants
+In this file describes the development process and its invariants.
 
 ## Audience
 

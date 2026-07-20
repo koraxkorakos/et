@@ -27,8 +27,8 @@ Priority (top first):
 
 # Functional Requirements
 
-  - At least 64 vector and 6 Multivector dimensions supported per default.
-    The number of dimensions is a compiletime constant and may be altered by 
+  - At least 64 vector and 6 multivector dimensions supported per default.
+    The number of dimensions is a compile-time constant and may be altered by 
     a configure time define.
     
   - Operations 
@@ -37,8 +37,8 @@ Priority (top first):
 	- binary +,-,*
 	- outer product (fully degenerate metric (Grassmann product))
 	- inner products any metric, 
-	- commuator and anticommutator
-	- scalar product (scalar is the multi vectir with only index 0 populated)
+	- commutator and anti-commutator
+	- scalar product (scalar is the multi vector with only index 0 populated)
 	- intersection, spanning
 	- any diagonal metric (signature)
 	

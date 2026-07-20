@@ -10,12 +10,12 @@ The library has two layers:
  consists of the following modules: 
  
    - Utility general helpers
-   - CTS Indexset
+   - CTS index set
    - Expression Template Framework
  
  ## Algebra Layer
 
-Conceptially all vectors are sparse maximum dimensional. where the maximum 
+Conventionally all vectors are sparse maximum dimensional. where the maximum 
 dimension is a compile time constant. All algebraic (multi-)vectors are embedded
 within this space.
 
