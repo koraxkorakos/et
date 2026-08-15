@@ -1,20 +1,19 @@
 module;
 
-// IMPLEMENTATION STATE:  this file is complete
-
 #include <concepts>
 #include <type_traits>
 #include <utility>
 
 export module ctv.concepts;
 
-import export ctv.expression_template;
-import export ctv.value_set;
+export import ctv.expression_template;
+export import ctv.value_set;
+export import ctv.special_values;
 
 namespace ctv::details {
 
 template <class E, class I, I... ns>
-consteval bool cts_sink_getters_valid(std::integer_sequence<I, ns...>) {
+consteval bool cts_sink_getters_valid(value_set<I, ns...>) {
   using T = std::remove_cvref_t<E>;
   using V = typename T::value_type;
 
@@ -110,7 +109,7 @@ concept CTS_Variable = CTS_Value<E> && CTS_Sink<E>;
 /// example:
 ///
 /// template <index_type n, class Self>
-///   requires element_of<value_set, n>
+///   requires (is_element_of<value_set>(n))
 /// constexpr decltype(auto) get_impl(this Self&& self)
 /// {
 ///   return std::forward_like<Self>(self.values[position<n>]);
@@ -125,14 +124,14 @@ private:
   using index_type = typename value_set::value_type;
 
   template <index_type n>
-    requires element_of<value_set, n>
+    requires(is_element_of<value_set>(n))
   friend constexpr decltype(auto)
   get(Derived const &value) noexcept(noexcept(value.template get_impl<n>())) {
     return value.template get_impl<n>();
   }
 
   template <index_type n>
-    requires element_of<value_set, n>
+    requires(is_element_of<value_set>(n))
   friend constexpr decltype(auto) get(Derived &&value) noexcept(
       noexcept(std::move(value).template get_impl<n>())) {
     return std::move(value).template get_impl<n>();
@@ -153,7 +152,7 @@ private:
   using index_type = typename value_set::value_type;
 
   template <index_type n>
-    requires element_of<value_set, n>
+    requires(is_element_of<value_set>(n))
   friend constexpr decltype(auto)
   get(Derived &sink) noexcept(noexcept(sink.template get_impl<n>())) {
     return sink.template get_impl<n>();
@@ -175,21 +174,21 @@ private:
   using index_type = typename value_set::value_type;
 
   template <index_type n>
-    requires element_of<value_set, n>
+    requires(is_element_of<value_set>(n))
   friend constexpr decltype(auto)
   get(Derived &value) noexcept(noexcept(value.template get_impl<n>())) {
     return value.template get_impl<n>();
   }
 
   template <index_type n>
-    requires element_of<value_set, n>
+    requires(is_element_of<value_set>(n))
   friend constexpr decltype(auto)
   get(Derived const &value) noexcept(noexcept(value.template get_impl<n>())) {
     return value.template get_impl<n>();
   }
 
   template <index_type n>
-    requires element_of<value_set, n>
+    requires(is_element_of<value_set>(n))
   friend constexpr decltype(auto) get(Derived &&value) noexcept(
       noexcept(std::move(value).template get_impl<n>())) {
     return std::move(value).template get_impl<n>();

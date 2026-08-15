@@ -1,156 +1,77 @@
-// cts_array.ixx
 module;
-
+#include <array>
 #include <cstddef>
-#include <tuple>
 #include <type_traits>
 #include <utility>
-
 export module ctv.array;
+export import ctv.cts_base;
 
-import export ctv.expression_template;
-import export ctv.value_set;
-import export ctv.special_values;
-import export ctv.cts_concepts;
-
-namespace ctv {
-
-namespace detail {
-template <typename Set, auto Index> struct index_position;
-
-template <typename T, T Index> struct index_position<ctv::value_set<T>, Index> {
-  static constexpr std::size_t value = static_cast<std::size_t>(-1);
-};
-
-template <typename T, T Head, T... Tail, T Index>
-struct index_position<ctv::value_set<T, Head, Tail...>, Index> {
-private:
-  static constexpr std::size_t tail_value =
-      index_position<ctv::value_set<T, Tail...>, Index>::value;
-
-public:
-  static constexpr std::size_t value =
-      Index == Head                                ? 0
-      : tail_value == static_cast<std::size_t>(-1) ? tail_value
-                                                   : 1 + tail_value;
-};
+namespace ctv::detail {
+template <class Sink, class Value, class T, T... I>
+constexpr void assign_indices(Sink &sink, Value const &value, value_set<T, I...>) {
+  ((get<I>(sink) = get<I>(value)), ...);
+}
 } // namespace ctv::detail
 
 export namespace ctv {
+struct ArrayContext {
+  template <CTS_Value E> constexpr auto operator()(E &&e) const { return std::forward<E>(e); }
 
-template <typename IndexSet, typename... Ts> struct multivector;
-
-template <typename T, T... Indices, typename... Ts>
-  requires(sizeof...(Indices) == sizeof...(Ts))
-struct multivector<value_set<T, Indices...>, Ts...> {
-  using indices = value_set<T, Indices...>;
-  using index_type = T;
-  using storage_type = std::tuple<Ts...>;
-
-  static constexpr std::size_t size = sizeof...(Ts);
-
-  storage_type values{};
-
-  constexpr multivector() = default;
-
-  constexpr explicit multivector(Ts... init) : values(std::move(init)...) {}
-
-  constexpr explicit multivector(storage_type init) : values(std::move(init)) {}
+  template <CTS_Sink Sink, CTS_Value Value>
+  constexpr void assign(Sink &sink, Value const &value) const {
+    static_assert(
+        std::same_as<typename Sink::indices, typename Value::indices>,
+        "CTS assignment requires identical structural support; use project "
+        "explicitly when truncation is intended");
+    detail::assign_indices(sink, value, typename Sink::indices{});
+  }
 };
 
-template <auto Index, typename T, T... Indices, typename... Ts>
-constexpr decltype(auto) get(multivector<value_set<T, Indices...>, Ts...> &v) {
-  static_assert(std::same_as<std::remove_cv_t<decltype(Index)>, T>,
-                "ctv::get<Index>(multivector): index type does not match "
-                "multivector::index_type");
+/// Homogeneous sparse storage. Context is part of the type and therefore
+/// controls how a generic expression is lowered on assignment/construction.
+template <class Context, ValueSet Indices, class T>
+struct cts_array : cts_variable_mixin<cts_array<Context, Indices, T>, Indices>,
+                   expression<cts_array<Context, Indices, T>> {
+  using context_type = Context;
+  using indices = Indices;
+  using index_type = typename indices::value_type;
+  using value_type = T;
+  std::array<T, indices::size> values{};
 
-  constexpr std::size_t pos =
-      detail::index_position<value_set<T, Indices...>, Index>::value;
+  constexpr cts_array() = default;
+  constexpr explicit cts_array(std::array<T, indices::size> init) : values(std::move(init)) {}
 
-  static_assert(
-      pos != static_cast<std::size_t>(-1),
-      "ctv::get<Index>(multivector): index is not present in the multivector");
+  template <Expression E> constexpr explicit cts_array(E const &syntax) {
+    auto semantic = Context{}(syntax);
+    static_assert(std::same_as<typename decltype(semantic)::indices, indices>,
+                  "explicit cts_array support does not match expression support");
+    Context{}.assign(*this, semantic);
+  }
 
-  return std::get<pos>(v.values);
-}
-
-template <auto Index, typename T, T... Indices, typename... Ts>
-constexpr decltype(auto)
-get(multivector<value_set<T, Indices...>, Ts...> const &v) {
-  static_assert(std::same_as<std::remove_cv_t<decltype(Index)>, T>,
-                "ctv::get<Index>(multivector): index type does not match "
-                "multivector::index_type");
-
-  constexpr std::size_t pos =
-      detail::index_position<value_set<T, Indices...>, Index>::value;
-
-  static_assert(
-      pos != static_cast<std::size_t>(-1),
-      "ctv::get<Index>(multivector): index is not present in the multivector");
-
-  return std::get<pos>(v.values);
-}
-
-template <auto Index, typename T, T... Indices, typename... Ts>
-constexpr decltype(auto) get(multivector<value_set<T, Indices...>, Ts...> &&v) {
-  static_assert(std::same_as<std::remove_cv_t<decltype(Index)>, T>,
-                "ctv::get<Index>(multivector): index type does not match "
-                "multivector::index_type");
-
-  constexpr std::size_t pos =
-      detail::index_position<value_set<T, Indices...>, Index>::value;
-
-  static_assert(
-      pos != static_cast<std::size_t>(-1),
-      "ctv::get<Index>(multivector): index is not present in the multivector");
-
-  return std::get<pos>(std::move(v.values));
-}
-
-template <auto Index, typename T, T... Indices, typename... Ts>
-constexpr decltype(auto)
-get(multivector<value_set<T, Indices...>, Ts...> const &&v) {
-  static_assert(std::same_as<std::remove_cv_t<decltype(Index)>, T>,
-                "ctv::get<Index>(multivector): index type does not match "
-                "multivector::index_type");
-
-  constexpr std::size_t pos =
-      detail::index_position<value_set<T, Indices...>, Index>::value;
-
-  static_assert(
-      pos != static_cast<std::size_t>(-1),
-      "ctv::get<Index>(multivector): index is not present in the multivector");
-
-  return std::get<pos>(std::move(v.values));
-}
-
-struct ArrayContext {
-  template <CTS_sink Sink, CTS_Value Value>
-  inline constexpr void assign(Sink &ref, Value const &value) {
-    assign_impl(ref, value, typename Sink::indices{});
+  /// Assignment chooses semantics from this sink's Context. Because this sink
+  /// already has a fixed structural support, the lowered expression must have
+  /// exactly the same support.
+  template <Expression E> constexpr cts_array &operator=(E const &syntax) {
+    auto semantic = Context{}(syntax);
+    Context{}.assign(*this, semantic);
+    return *this;
   }
 
 private:
-  template <CTS_sink Sink, CTS_Value Value, typename T, T t, T... ts>
-  inline constexpr void assign_impl(Sink &ref, Value const &value,
-                                    value_set<T, t, ts...>) {
-    get<t>(ref) = get<t>(value);
-    if constexpr (sizeof...(ts))
-      assign_impl<Sink, Value, Context, Ts...>(ref, value, ctx, ts...);
+  template <index_type I, class Self> constexpr decltype(auto) get_impl(this Self &&self) {
+    constexpr auto position = find_pos<indices>(I);
+    static_assert(position >= 0);
+    return std::forward<Self>(self).values[static_cast<std::size_t>(position)];
   }
-  template <CTS_sink Sink, CTS_Value Value, typename T>
-  inline constexpr void assign_impl(Sink &, Value const &, value_set<T>) {}
+  friend cts_variable_mixin<cts_array, indices>;
 };
+
+template <class Context, Expression E>
+[[nodiscard]] constexpr auto make_cts_array(E const &syntax) {
+  auto semantic = Context{}(syntax);
+  using S = decltype(semantic);
+  cts_array<Context, typename S::indices, typename S::value_type> result;
+  Context{}.assign(result, semantic);
+  return result;
+}
 } // namespace ctv
-
-namespace std {
-template <typename T, T... Indices, typename... Ts>
-struct tuple_size<ctv::multivector<ctv::value_set<T, Indices...>, Ts...>>
-    : integral_constant<std::size_t, sizeof...(Ts)> {};
-
-template <std::size_t I, typename T, T... Indices, typename... Ts>
-struct tuple_element<I,
-                     ctv::multivector<ctv::value_set<T, Indices...>, Ts...>> {
-  using type = tuple_element_t<I, tuple<Ts...>>;
-};
-} // namespace std

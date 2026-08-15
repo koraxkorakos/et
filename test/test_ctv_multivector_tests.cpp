@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 
 import ctv.multivector;
+import ctv.value_set;
 
 #include <string>
 #include <tuple>

@@ -1,4 +1,4 @@
-// cts.cppm
+// Legacy cts.cppm
 export module cts;
 
 // Re-export all partitions

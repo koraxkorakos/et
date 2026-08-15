@@ -101,10 +101,10 @@ template <typename A, typename B, auto x> struct prepend_difference_ {
 export namespace ctv {
 
 template <typename T>
-concept ValueList = details::is_value_list_v<std::remove_cvref_t<T>>;
+concept ValueList = detail::is_value_list_v<std::remove_cvref_t<T>>;
 
 template <typename T>
-concept ValueSet = details::is_value_set_v<std::remove_cvref_t<T>>;
+concept ValueSet = detail::is_value_set_v<std::remove_cvref_t<T>>;
 
 /// \brief Set-theoretic union of two canonical value_set types.
 template <typename A, typename B> struct set_union;

@@ -1,4 +1,4 @@
-# CMakeLists.txt snippet
+# Legacy CMakeLists.txt snippet
 add_library(cts)
 target_sources(cts 
     PRIVATE

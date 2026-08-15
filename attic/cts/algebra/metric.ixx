@@ -1,4 +1,4 @@
-// metric.ixx
+// Legacy metric.ixx
 export module cts:metric;
 
 import :utilities;

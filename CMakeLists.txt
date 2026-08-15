@@ -57,7 +57,7 @@ target_sources(ctv_value_set
     FILE_SET cxx_modules TYPE CXX_MODULES
     BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
     FILES
-      ${CMAKE_CURRENT_SOURCE_DIR}/modules/ctv/value_set.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/valueset/valueset.ixx
 )
 
 target_compile_features(ctv_value_set
@@ -127,7 +127,7 @@ target_sources(ctv_special_values
     FILE_SET cxx_modules TYPE CXX_MODULES
     BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
     FILES
-      ${CMAKE_CURRENT_SOURCE_DIR}/modules/ctv/special_values.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/utilities/special_values.ixx
 )
 
 target_compile_features(ctv_special_values
@@ -141,6 +141,30 @@ target_link_libraries(ctv_sparse_vector_demo
   PUBLIC
     ctv_special_values
 )
+
+# ---- Library: context-selected compile-time sparse algebra ----
+
+add_library(ctv_cts)
+add_library(ctv::cts ALIAS ctv_cts)
+
+target_sources(ctv_cts
+  PUBLIC
+    FILE_SET cxx_modules TYPE CXX_MODULES
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+    FILES
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/utilities/expression_template.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/algebra/cts_concepts.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/algebra/cts_base.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/algebra/array.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/algebra/additive_group.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/algebra/vector_space.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/algebra/grassmann.ixx
+      ${CMAKE_CURRENT_SOURCE_DIR}/modules/cts/algebra/orthogonal_ga.ixx
+)
+
+target_compile_features(ctv_cts PUBLIC cxx_std_23)
+target_link_libraries(ctv_cts PUBLIC ctv_value_set ctv_special_values)
+ctv_enable_sanitizers(ctv_cts)
 
 # ---- Tests ----
 
@@ -242,6 +266,24 @@ if(CTV_BUILD_TESTS)
   add_test(
     NAME ctv_special_values_tests
     COMMAND ctv_special_values_tests
+  )
+
+  add_executable(ctv_cts_tests
+    test/test_ctv_cts_tests.cpp
+  )
+
+  target_link_libraries(ctv_cts_tests
+    PRIVATE
+      ctv_cts
+      doctest::doctest
+  )
+
+  target_compile_features(ctv_cts_tests PRIVATE cxx_std_23)
+  ctv_enable_sanitizers(ctv_cts_tests)
+
+  add_test(
+    NAME ctv_cts_tests
+    COMMAND ctv_cts_tests
   )
 endif()
 

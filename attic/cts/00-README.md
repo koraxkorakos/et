@@ -1,4 +1,4 @@
-# Module Structure
+# Legacy module structure
 
 ## Directory Structure
 

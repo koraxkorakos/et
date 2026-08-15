@@ -1,4 +1,4 @@
-// symplectic_ga.ixx
+// Legacy symplectic_ga.ixx
 export module cts:symplectic_ga;
 
 import :multivector;

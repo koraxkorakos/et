@@ -1,4 +1,4 @@
-// multivector.ixx
+// Legacy multivector.ixx
 export module cts:multivector;
 
 import :vector_space;
