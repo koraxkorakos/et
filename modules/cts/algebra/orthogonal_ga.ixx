@@ -27,7 +27,7 @@ template <std::unsigned_integral T> constexpr int geometric_sign(T lhs, T rhs) {
 template <class Metric, std::unsigned_integral T>
 constexpr auto metric_factor(T overlap) {
   using result = std::remove_cvref_t<decltype(Metric{}(T{1}))>;
-  result factor{1};
+  result factor = coefficient_traits<result>::one();
   while (overlap) {
     auto bit = std::countr_zero(overlap);
     factor *= Metric{}(static_cast<T>(T{1} << bit));
@@ -41,7 +41,7 @@ template <class Metric, bool InnerOnly, auto I, auto A, class L, class R,
 constexpr auto metric_coefficient_row(L const &l, R const &r,
                                       value_set<T, RI...>) {
   using result = std::common_type_t<typename L::value_type, typename R::value_type>;
-  result sum{};
+  result sum = coefficient_traits<result>::zero();
   ([&] {
     if constexpr ((A ^ RI) == I && (!InnerOnly || (A & RI) != 0))
       sum += static_cast<result>(
@@ -60,7 +60,7 @@ constexpr auto metric_coefficient(L const &l, R const &r,
                                   value_set<T, RI...>) {
   using result =
       std::common_type_t<typename L::value_type, typename R::value_type>;
-  result sum{};
+  result sum = coefficient_traits<result>::zero();
   ((sum += metric_coefficient_row<Metric, InnerOnly, I, LI>(
         l, r, value_set<T, RI...>{})), ...);
   return sum;

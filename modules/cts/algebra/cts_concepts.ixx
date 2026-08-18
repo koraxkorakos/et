@@ -76,6 +76,7 @@ concept CTS_Object =
       typename std::remove_cvref_t<E>::index_type;
       typename std::remove_cvref_t<E>::value_type;
     } &&
+    CTS_Field<typename std::remove_cvref_t<E>::value_type> &&
     std::derived_from<std::remove_cvref_t<E>,
                       cts_base<typename std::remove_cvref_t<E>::indices>>;
 

@@ -17,6 +17,16 @@ export namespace ctv {
 struct ArrayContext {
   template <CTS_Value E> constexpr auto operator()(E &&e) const { return std::forward<E>(e); }
 
+  template <class T>
+  constexpr auto operator()(constant_expression<T> const &value) const {
+    return lower_scalar(value);
+  }
+
+  template <class T>
+  constexpr auto operator()(reference_expression<T> const &value) const {
+    return lower_scalar(value);
+  }
+
   template <CTS_Sink Sink, CTS_Value Value>
   constexpr void assign(Sink &sink, Value const &value) const {
     static_assert(

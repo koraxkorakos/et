@@ -1,4 +1,5 @@
 module;
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
@@ -7,6 +8,65 @@ export module ctv.cts_base;
 export import ctv.concepts;
 
 export namespace ctv {
+
+/// A CTS terminal with one coefficient at a specified structural index.
+template <std::size_t Index, class T = int>
+  requires CTS_Field<T>
+struct cts_one_expression
+    : cts_value_mixin<cts_one_expression<Index, T>, index_set<Index>>,
+      constant_expr<cts_one_expression<Index, T>> {
+  using indices = index_set<Index>;
+  using index_type = typename indices::value_type;
+  using value_type = T;
+
+private:
+  template <index_type I>
+  constexpr T get_impl() const
+      noexcept(noexcept(coefficient_traits<T>::one())) {
+    static_assert(I == Index);
+    return coefficient_traits<T>::one();
+  }
+
+  friend cts_value_mixin<cts_one_expression, indices>;
+};
+
+/// Construct the unit basis blade at the bit-mask index Index.
+template <std::size_t Index, class T = int>
+[[nodiscard]] constexpr auto basis_blade() noexcept {
+  return cts_one_expression<Index, T>{};
+}
+
+/// The CTS representation of a domain-independent value terminal.
+template <class Arg>
+struct cts_scalar_expression
+    : cts_value_mixin<cts_scalar_expression<Arg>, index_set<0>>,
+      unary_expr<cts_scalar_expression<Arg>, Arg> {
+  using indices = index_set<0>;
+  using index_type = typename indices::value_type;
+  using value_type =
+      std::remove_cv_t<typename std::remove_cvref_t<Arg>::value_type>;
+  using base = unary_expr<cts_scalar_expression<Arg>, Arg>;
+  using base::base;
+
+private:
+  template <index_type I, class Self>
+  constexpr decltype(auto) get_impl(this Self &&self) noexcept {
+    static_assert(I == 0);
+    return std::forward<Self>(self).template argument<0>().get();
+  }
+
+  friend cts_value_mixin<cts_scalar_expression, indices>;
+};
+
+template <class T>
+[[nodiscard]] constexpr auto lower_scalar(constant_expression<T> const &value) {
+  return cts_scalar_expression<constant_expression<T>>{value};
+}
+
+template <class T>
+[[nodiscard]] constexpr auto lower_scalar(reference_expression<T> const &value) {
+  return cts_scalar_expression<reference_expression<T>>{value};
+}
 
 /// Sparse value projection/cast adapter.
 ///

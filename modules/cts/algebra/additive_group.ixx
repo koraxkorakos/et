@@ -46,6 +46,7 @@ template <class Derived> struct AdditiveGroupContextBase : ArrayContext {
 private:
   constexpr Derived const &derived() const { return static_cast<Derived const &>(*this); }
 public:
+  using ArrayContext::operator();
   template <CTS_Value E> constexpr auto operator()(E &&e) const { return std::forward<E>(e); }
 
   template <class L, class R> constexpr auto operator()(add_expr<L, R> const &e) const {

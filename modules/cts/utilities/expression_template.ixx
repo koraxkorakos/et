@@ -1,5 +1,7 @@
 module;
+#include <concepts>
 #include <cstddef>
+#include <memory>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -42,6 +44,76 @@ template <class Derived> using constant_expr = expression<Derived>;
 template <class Derived, class Arg> using unary_expr = expression<Derived, Arg>;
 template <class Derived, class Lhs, class Rhs>
 using binary_expr = expression<Derived, Lhs, Rhs>;
+
+/// A terminal expression which owns its value.
+template <class T>
+struct constant_expression : constant_expr<constant_expression<T>> {
+  using value_type = T;
+
+  template <class U>
+    requires std::constructible_from<T, U>
+  constexpr explicit constant_expression(U &&value)
+      noexcept(std::is_nothrow_constructible_v<T, U>)
+      : stored_value(std::forward<U>(value)) {}
+
+  template <class Self>
+  [[nodiscard]] constexpr decltype(auto) get(this Self &&self) noexcept {
+    return std::forward_like<Self>(self.stored_value);
+  }
+
+private:
+  T stored_value;
+};
+
+template <class T> constant_expression(T) -> constant_expression<T>;
+
+/// A terminal expression which refers to an externally owned value.
+///
+/// Like std::reference_wrapper, copying this expression copies the reference,
+/// not the referenced object. The object must outlive the expression tree.
+template <class T>
+struct reference_expression : constant_expr<reference_expression<T>> {
+  using value_type = T;
+
+  constexpr explicit reference_expression(T &value) noexcept
+      : stored_reference(std::addressof(value)) {}
+
+  [[nodiscard]] constexpr T &get() const noexcept { return *stored_reference; }
+  constexpr operator T &() const noexcept { return get(); }
+
+private:
+  T *stored_reference;
+};
+
+template <class T> reference_expression(T &) -> reference_expression<T>;
+
+/// Lift a value into the expression-template domain by owning it.
+template <class T>
+[[nodiscard]] constexpr auto constant(T &&value)
+    noexcept(std::is_nothrow_constructible_v<std::decay_t<T>, T>) {
+  return constant_expression<std::decay_t<T>>{std::forward<T>(value)};
+}
+
+template <class T>
+[[nodiscard]] constexpr auto value(T &&object)
+    noexcept(noexcept(constant(std::forward<T>(object)))) {
+  return constant(std::forward<T>(object));
+}
+
+/// Lift an lvalue into the expression-template domain without copying it.
+template <class T>
+[[nodiscard]] constexpr auto reference(T &value) noexcept {
+  return reference_expression<T>{value};
+}
+
+template <class T> void reference(T const &&) = delete;
+
+template <class T>
+[[nodiscard]] constexpr auto ref(T &object) noexcept {
+  return reference(object);
+}
+
+template <class T> void ref(T const &&) = delete;
 
 #define CTV_BINARY_EXPRESSION(Name)                                            \
   template <class Lhs, class Rhs>                                             \

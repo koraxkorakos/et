@@ -38,7 +38,7 @@ template <auto I, auto A, class L, class R, class T, T... RI>
 constexpr auto outer_coefficient_row(L const &l, R const &r,
                                      value_set<T, RI...>) {
   using result = std::common_type_t<typename L::value_type, typename R::value_type>;
-  result sum{};
+  result sum = coefficient_traits<result>::zero();
   ([&] {
     if constexpr ((A & RI) == 0 && (A ^ RI) == I)
       sum += static_cast<result>(wedge_sign(A, RI)) *
@@ -53,7 +53,7 @@ constexpr auto outer_coefficient(L const &l, R const &r,
                                  value_set<T, LI...>, value_set<T, RI...>) {
   using result =
       std::common_type_t<typename L::value_type, typename R::value_type>;
-  result sum{};
+  result sum = coefficient_traits<result>::zero();
   ((sum += outer_coefficient_row<I, LI>(l, r, value_set<T, RI...>{})), ...);
   return sum;
 }

@@ -8,6 +8,21 @@ import ctv.orthogonal_ga;
 #include <string>
 #include <type_traits>
 
+struct custom_coefficient {
+  int value;
+  custom_coefficient() = delete;
+  constexpr explicit custom_coefficient(int value) : value(value) {}
+};
+
+template <> struct ctv::coefficient_traits<custom_coefficient> {
+  static constexpr custom_coefficient zero() noexcept {
+    return custom_coefficient{10};
+  }
+  static constexpr custom_coefficient one() noexcept {
+    return custom_coefficient{11};
+  }
+};
+
 namespace {
 
 using terminal =
@@ -91,4 +106,40 @@ TEST_CASE("terminal expressions lift owned values and references") {
   auto const_reference = ctv::reference(immutable);
   static_assert(std::same_as<decltype(const_reference.get()), int const &>);
   CHECK(const_reference.get() == 7);
+}
+
+TEST_CASE("CTS contexts lower value terminals to scalar coefficients") {
+  terminal vector{std::array{2, 3}};
+  int scale = 4;
+
+  auto syntax = ctv::ref(scale) * vector + ctv::value(1);
+  ctv::vector_array result{syntax};
+
+  static_assert(std::same_as<typename decltype(result)::indices,
+                             ctv::index_set<0, 1, 2>>);
+  CHECK(get<0>(result) == 1);
+  CHECK(get<1>(result) == 8);
+  CHECK(get<2>(result) == 12);
+}
+
+TEST_CASE("unit basis blades carry one at a chosen nonzero index") {
+  constexpr auto e1 = ctv::basis_blade<1>();
+  constexpr auto e2 = ctv::basis_blade<2>();
+  static_assert(ctv::CTS_Value<decltype(e1)>);
+  static_assert(std::same_as<typename decltype(e1)::indices,
+                             ctv::index_set<1>>);
+  static_assert(static_cast<int>(get<1>(e1)) == 1);
+  static_assert(static_cast<int>(get<0>(e1)) == 0);
+
+  ctv::grassmann_array bivector{ctv::outer_product(e1, e2)};
+  static_assert(std::same_as<typename decltype(bivector)::indices,
+                             ctv::index_set<3>>);
+  CHECK(get<3>(bivector) == 1);
+}
+
+TEST_CASE("coefficient traits customize field identities") {
+  constexpr auto blade = ctv::basis_blade<4, custom_coefficient>();
+  static_assert(ctv::CTS_Field<custom_coefficient>);
+  static_assert(get<4>(blade).value == 11);
+  static_assert(static_cast<custom_coefficient>(get<0>(blade)).value == 10);
 }
