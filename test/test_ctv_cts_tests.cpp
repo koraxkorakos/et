@@ -5,6 +5,7 @@ import ctv.orthogonal_ga;
 
 #include <array>
 #include <cstddef>
+#include <string>
 #include <type_traits>
 
 namespace {
@@ -68,4 +69,26 @@ TEST_CASE("vector-space and geometric contexts interpret multiplication") {
       ctv::OrthogonalGAContext<euclidean_metric>{}(vector * vector);
   CHECK(get<0>(geometric) == 13);
   CHECK(get<3>(geometric) == 0);
+}
+
+TEST_CASE("terminal expressions lift owned values and references") {
+  auto owned = ctv::value(std::string{"owned"});
+  static_assert(ctv::Expression<decltype(owned)>);
+  static_assert(std::same_as<typename decltype(owned)::value_type, std::string>);
+  CHECK(owned.get() == "owned");
+
+  int source = 41;
+  auto referenced = ctv::ref(source);
+  auto copied_reference = referenced;
+  static_assert(ctv::Expression<decltype(referenced)>);
+  static_assert(std::same_as<typename decltype(referenced)::value_type, int>);
+
+  copied_reference.get() += 1;
+  CHECK(source == 42);
+  CHECK(&referenced.get() == &source);
+
+  int const immutable = 7;
+  auto const_reference = ctv::reference(immutable);
+  static_assert(std::same_as<decltype(const_reference.get()), int const &>);
+  CHECK(const_reference.get() == 7);
 }
