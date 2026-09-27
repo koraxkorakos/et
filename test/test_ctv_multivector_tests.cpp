@@ -16,6 +16,68 @@ namespace
         e1 = 1,
         e2 = 2
     };
+
+    struct nullary_expression
+    {
+        using index_set = ctv::value_set<axis, axis::scalar, axis::e2>;
+
+        int scalar;
+        float e2;
+    };
+
+    template <axis Index>
+    constexpr decltype(auto) get(nullary_expression const& expression)
+    {
+        if constexpr (Index == axis::scalar)
+            return expression.scalar;
+        else
+            return expression.e2;
+    }
+
+    struct unary_expression
+    {
+        using index_set = nullary_expression::index_set;
+        nullary_expression operand;
+    };
+
+    template <axis Index>
+    constexpr auto get(unary_expression const& expression)
+    {
+        return -get<Index>(expression.operand);
+    }
+
+    struct binary_expression
+    {
+        using index_set = nullary_expression::index_set;
+        nullary_expression lhs;
+        unary_expression rhs;
+    };
+
+    template <axis Index>
+    constexpr auto get(binary_expression const& expression)
+    {
+        return get<Index>(expression.lhs) + get<Index>(expression.rhs);
+    }
+}
+
+TEST_CASE("multivector CTAD materializes nullary, unary, and binary expressions")
+{
+    nullary_expression terminal{4, 2.5F};
+    ctv::multivector nullary{terminal};
+    ctv::multivector unary{unary_expression{terminal}};
+    ctv::multivector binary{
+        binary_expression{terminal, unary_expression{terminal}}};
+
+    using expected = ctv::value_set<axis, axis::scalar, axis::e2>;
+    static_assert(std::same_as<typename decltype(nullary)::index_set, expected>);
+    static_assert(std::same_as<std::tuple_element_t<0, decltype(nullary)>, int>);
+    static_assert(std::same_as<std::tuple_element_t<1, decltype(nullary)>, float>);
+    static_assert(std::same_as<std::tuple_element_t<0, decltype(unary)>, int>);
+    static_assert(std::same_as<std::tuple_element_t<1, decltype(binary)>, float>);
+
+    CHECK(ctv::get<axis::scalar>(nullary) == 4);
+    CHECK(ctv::get<axis::e2>(unary) == doctest::Approx(-2.5F));
+    CHECK(ctv::get<axis::scalar>(binary) == 0);
 }
 
 TEST_CASE("multivector stores heterogeneous elements under custom indices")
